@@ -18,7 +18,7 @@ CCOPTS = --endian=little -mv7M4 --abi=eabi --float_support=fpv4spd16 -q -ms --op
 
 BIOS_INC = -I"C:/ti/simplelink_msp432p4_sdk_3_40_01_02/kernel/tirtos/packages/"
 ANNEX_INCS =  -IC:/ti/simplelink_msp432p4_sdk_3_40_01_02/source/ti/posix/ccs
-INCS = $(BIOS_INC) $(ANNEX_INCS) -I"C:/ti/simplelink_msp432p4_sdk_3_40_01_02/source/" -I"C:/ti/simplelink_msp432p4_sdk_3_40_01_02/kernel/tirtos/packages/" -I"C:/Users/senit/myRepository/packages/" -I"C:/ti/ccs1220/xdctools_3_62_01_16_core/packages/" -I"../" -I"/packages//"  -IC:/ti/ccs1220/ccs/tools/compiler/ti-cgt-arm_20.2.7.LTS/include 
+INCS = $(BIOS_INC) $(ANNEX_INCS) -I"C:/ti/simplelink_msp432p4_sdk_3_40_01_02/source/" -I"C:/ti/simplelink_msp432p4_sdk_3_40_01_02/kernel/tirtos/packages/" -I"C:/Users/senit/myRepository/packages/" -I"C:/ti/" -I"C:/ti/ccs1220/xdctools_3_62_01_16_core/packages/" -I"../" -I"/packages//"  -IC:/ti/ccs1220/ccs/tools/compiler/ti-cgt-arm_20.2.7.LTS/include 
 
 CC = C:/ti/ccs1220/ccs/tools/compiler/ti-cgt-arm_20.2.7.LTS/bin/armcl -c $(CCOPTS)
 ASM = C:/ti/ccs1220/ccs/tools/compiler/ti-cgt-arm_20.2.7.LTS/bin/armcl -c $(CCOPTS)

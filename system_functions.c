@@ -8,7 +8,7 @@
  // Updated:         12/2018
 
 #include "system.h"
-
+//#include <msp.h>
 /*DEFINITION*********************************************************************************
 *
 * Definition    : #define SYSTEM_CLOCK;
@@ -100,8 +100,10 @@ void funcion_inicial (void)
     GPIO_setOutput(BSP_LED3_PORT,  BSP_LED3,  0);
     GPIO_setOutput(BSP_LED4_PORT,  BSP_LED4,  0);
     //Esperamos a que el usuario utilice una tecla
-    UART_putsf(MAIN_UART, "\n\rContinuamos?");    //Imprime el mensaje en la terminal serial.
-    while(EUSCI_A_CMSIS(EUSCI_A0)->RXBUF == 0X0000); //Mientras no haya nada en el buffer del registro donde se reciben los datos.
+    UART_putsf(MAIN_UART, "Continuamos?\n");    //Imprime el mensaje en la terminal serial.
+    printf("Continuamos?\n");
+    while(EUSCI_A_CMSIS(EUSCI_A0)->RXBUF == 0X0000);
+    //while(EUSCI_A_CMSIS(EUSCI_A0)->RXBUF == 0X0000); //Mientras no haya nada en el buffer del registro donde se reciben los datos.
 }
 
 /*FUNCTION******************************************************************************
@@ -110,94 +112,46 @@ void funcion_inicial (void)
 * Comments         :
 *END***********************************************************************************/
 //Declaracion de variables para contadores de pulsaciones de cada Switch/Push B
-uint8_t SW_1 = 0;
-uint8_t SW_2 = 0;
+uint8_t SWITCH = 0;
+uint8_t INTERACION = 0;
 
 void process_events(void)
 {
 //static bool bandera_blink = FALSE;
+    if(INTERACION == 0)
+    {
     UART_putsf(MAIN_UART, "\n\rIniciando programa");
-    _delay_cycles(1000000);
-
+    printf("Iniciando\n");
+    GPIO_setOutput(BSP_LED2_PORT,  BSP_LED2,  0);   //RGB: RED ON
+    GPIO_setOutput(BSP_LED3_PORT,  BSP_LED3,  1);   //RGB: GREEN OFF
+    GPIO_setOutput(BSP_LED4_PORT,  BSP_LED4,  0);   //RGB: BLUE OFF
+    _delay_cycles(10000000);
+    }
     if(GPIO_getInputPinValue(BSP_BUTTON1_PORT, BSP_BUTTON1) != BOARD_BUTTON_NORMAL_STATE) // Entra cuando se presiona el botón 1.
     {
-        GPIO_setOutput(BSP_LED3_PORT,  BSP_LED3,  1);
-    while(GPIO_getInputPinValue(BSP_BUTTON1_PORT, BSP_BUTTON2) != BOARD_BUTTON_NORMAL_STATE);
+        INTERACION = INTERACION + 1;
+        if(INTERACION > 0 && INTERACION < 7)
+        {
+        GPIO_setOutput(BSP_LED2_PORT,  BSP_LED2,  1);   //RGB: RED ON
+        GPIO_setOutput(BSP_LED3_PORT,  BSP_LED3,  0);   //RGB: GREEN OFF
+        GPIO_setOutput(BSP_LED4_PORT,  BSP_LED4,  0);   //RGB: BLUE OFF
+        UART_putsf(MAIN_UART, "\n\rAPP PAUSADA");
+        printf("Pausa\n");
+        _delay_cycles(30000000);
+
+            GPIO_setOutput(BSP_LED2_PORT,  BSP_LED2,  0);   //RGB: RED OFF
+            GPIO_setOutput(BSP_LED3_PORT,  BSP_LED3,  1);   //RGB: GREEN ON
+            GPIO_setOutput(BSP_LED4_PORT,  BSP_LED4,  0);   //RGB: BLUE OFF
+            UART_putsf(MAIN_UART, "\n\rPROGRAMA EJECUTANDOSE");
+        }
+        if(INTERACION > 7){
+            GPIO_setOutput(BSP_LED2_PORT,  BSP_LED2,  0);   //RGB: RED OFF
+            GPIO_setOutput(BSP_LED3_PORT,  BSP_LED3,  0);   //RGB: GREEN ON
+            GPIO_setOutput(BSP_LED4_PORT,  BSP_LED4,  0);   //RGB: BLUE OFF
+            UART_putsf(MAIN_UART, "\n\r ITERACIONES TERMINADAS, FINALIZANDO APLICACION.");
+            printf("Termina\n");
+            INTERACION = 0;
+        }
+        while(GPIO_getInputPinValue(BSP_BUTTON1_PORT, BSP_BUTTON1) != BOARD_BUTTON_NORMAL_STATE);
     }
-}//Cierra llave de process_events
-
- /*     int i, j;       //Banderas de tipo entero que son utilizadas en los ciclos for.
-
-    uint8_t bandera_btn1=0;     //Bandera de tipo entero sin signo de 8 bits para el control del boton 1.
-    uint8_t bandera_btn2=0;     //Bandera de tipo entero sin signo de 8 bits para el control del boton 2.
-
-    //Ciclo for de 5 iteraciones
-    for(i=0; i<5; i++){
-        UART_putsf(MAIN_UART, "\n\rAPP EJECUTANDOSE");      //Se imprime en consola el mensaje.
-        //ciclo para el parpadeo del led verde
-        while(bandera_btn1==0 && bandera_btn2==0){      //Mientras que no se hayan presionado ningun botón. (Las banderas correspondientes a cada boton estén en cero).
-            GPIO_setOutput(BSP_LED2_PORT,  BSP_LED2,  0);       //apaga el led rojo
-            GPIO_setOutput(BSP_LED2_PORT,  BSP_LED3,  0);       //enciende el led verde
-            GPIO_setOutput(BSP_LED2_PORT,  BSP_LED4,  0);       //apaga el led azul
-            _delay_cycles(5000000);         //delay de 1/8 de segundo
-            GPIO_setOutput(BSP_LED2_PORT,  BSP_LED2,  0);       //apaga el led rojo
-            GPIO_setOutput(BSP_LED2_PORT,  BSP_LED3,  1);       //apaga el led verde
-            GPIO_setOutput(BSP_LED2_PORT,  BSP_LED4,  0);       //apaga el led azul
-            _delay_cycles(5000000);         //delay de 1/8 de segundo
-            if(GPIO_getInputPinValue(BSP_BUTTON1_PORT, BSP_BUTTON1) != BOARD_BUTTON_NORMAL_STATE){      //Si se presiona el botón 1.
-                bandera_btn1=1;     //El valor de la bandera de control de boton 1 cambia a uno, saliendo del ciclo de parpadeo.
-                while(GPIO_getInputPinValue(BSP_BUTTON1_PORT, BSP_BUTTON1) != BOARD_BUTTON_NORMAL_STATE);       //While que impide que al mantener presionando el boton 2 el programa avance, hasta que este se deje de presionar.
-            }
-            if(GPIO_getInputPinValue(BSP_BUTTON2_PORT, BSP_BUTTON2) != BOARD_BUTTON_NORMAL_STATE){      //Si se presiona el boton 2.
-                bandera_btn2=1;     //El valor de la bandera de control de boton 1 cambia a uno, saliendo del ciclo de parpadeo.
-                timerflag = true;       //La bandera booleana de control de TIMER cambia a true.
-                while(GPIO_getInputPinValue(BSP_BUTTON2_PORT, BSP_BUTTON2) != BOARD_BUTTON_NORMAL_STATE);       //While que impide que al mantener presionando el boton 2 el programa avance, hasta que este se deje de presionar.
-            }
-        }
-        if(bandera_btn1==1){        //Si la bandera de control del boton 1 vale uno...
-            GPIO_setOutput(BSP_LED2_PORT,  BSP_LED2,  1);       //enciende el led rojo
-            GPIO_setOutput(BSP_LED2_PORT,  BSP_LED3,  1);       //enciende el led verde
-            GPIO_setOutput(BSP_LED2_PORT,  BSP_LED4,  0);       //apaga el led azul
-            UART_putsf(MAIN_UART, "\n\rAPP PAUSADA");       //Se imprime en la termianl serial el mensaje.
-            //Ciclo para generar un retraso enclavado, obligando a que pasen 4 segundos para poder presionar cualquier boton.
-            for(j=0; j<8; j++){     //Se repite 8 veces para que el retardo sea de 4 segundos.
-                _delay_cycles(5000000);     //4 delays de 1/8 parte de segundo, formando medio segundo.
-                _delay_cycles(5000000);
-                _delay_cycles(5000000);
-                _delay_cycles(5000000);
-            }
-            bandera_btn1=0;     //La bandera del boton 1 regresa al valor de cero, volviendo al ciclo iterativo y al parpadeo del led verde.
-        }
-        if(bandera_btn2==1){    //Si la bandera de control del boton 2 vale uno...
-            UART_putsf(MAIN_UART, "\n\rSI DESEA TERMINAR LA APLICACIÓN, ENTONCES VUELVA A PRESIONAR EL SWITCH_2");      //Imprime en la terminal serial el mensaje.
-            Delay_ms(5000);     //Delay de tiempo en paralelo que dura 5 segundos, habilitando durante este tiempo la posibilidad de finalizar la ejecución.
-        while(timerflag==true /*&& bandera_btn2==1*/ //){      //Mientras que la bandera booleana de control del TIMER sea verdadera...
-                //Parpadeo del led verde.
- /*               GPIO_setOutput(BSP_LED2_PORT,  BSP_LED2,  0);       //apaga el led rojo
-                GPIO_setOutput(BSP_LED2_PORT,  BSP_LED3,  0);       //enciende el led verde
-                GPIO_setOutput(BSP_LED2_PORT,  BSP_LED4,  0);       //apaga el led azul
-                _delay_cycles(5000000);         //delay de 1/8 de segundo.
-                GPIO_setOutput(BSP_LED2_PORT,  BSP_LED2,  0);       //apaga el led rojo
-                GPIO_setOutput(BSP_LED2_PORT,  BSP_LED3,  1);       //apaga el led verde
-                GPIO_setOutput(BSP_LED2_PORT,  BSP_LED4,  0);       //apaga el led azul
-                _delay_cycles(5000000);         //delay de 1/8 de segundo.
-                if(GPIO_getInputPinValue(BSP_BUTTON2_PORT, BSP_BUTTON2) != BOARD_BUTTON_NORMAL_STATE){      //Si se presiona el boton 2...
-                    while(GPIO_getInputPinValue(BSP_BUTTON2_PORT, BSP_BUTTON2) != BOARD_BUTTON_NORMAL_STATE);       //While que impide que al mantener presionando el boton 2 el programa avance, hasta que este se deje de presionar.
-                    UART_putsf(MAIN_UART, "\n\r FINALIZANDO APLICACION.");      //Imprime en la terminal serial el mensaje.
-                    GPIO_setOutput(BSP_LED2_PORT,  BSP_LED2,  0);       //apaga el led rojo
-                    GPIO_setOutput(BSP_LED2_PORT,  BSP_LED3,  0);       //apaga el led verde
-                    GPIO_setOutput(BSP_LED2_PORT,  BSP_LED4,  0);       //apaga el led azul
-                    exit(1);        //Se finaliza la ejecución de la aplicación.
-                }
-            }
-            bandera_btn2=0;     //El valor de la bandera del boton 2 vuelve a ser cero, volviendo al ciclo iterativo y al parpadeo del led verde.
-        }
-    }
-    //Se apagan los les 2, 3 y 4.
-    GPIO_setOutput(BSP_LED2_PORT,  BSP_LED2,  0);       //apaga el led rojo
-    GPIO_setOutput(BSP_LED2_PORT,  BSP_LED3,  0);       //apaga el led verde
-    GPIO_setOutput(BSP_LED2_PORT,  BSP_LED4,  0);       //apaga el led azul
-    UART_putsf(MAIN_UART, "\n\r ITERACIONES TERMINADAS, FINALIZANDO APLICACION.");      //Imprime en la terminals serial el mensaje.
-    exit(1);        //Finlaiza la ejecución de la aplicación.
-
-*/
+}
